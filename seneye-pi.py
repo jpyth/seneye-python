@@ -67,10 +67,11 @@ def hello_sud(dev, epIn, epOut):
           print("HELO hex     >>>",printhex(hello_read))
       if hello_read[0] == 136:
         print "good response"
+        return True
         break
       attempts = attempts + 1
       time.sleep(1)
-
+    return None
 
 def read_sud(dev,epIn,epOut):     
     msg="READING"
@@ -92,7 +93,7 @@ def read_sud(dev,epIn,epOut):
           print("sensor bits  >>>",result_bitarray.bin)
       attempts = attempts + 1
       time.sleep(1)
-
+    return None
 
 def bye_sud(dev,epIn,epOut):
     msg="BYESUD"
@@ -152,15 +153,17 @@ def main():
     # open device/find endpoints
     dev,epIn,epOut,interface = set_up()
     # send and read HELLOSUD
-    hello_sud(dev,epIn,epOut)
+    hello_result = hello_sud(dev,epIn,epOut)
     # send and read READING
-    read_results=read_sud(dev,epIn,epOut)
+    if hello_result:
+      read_results=read_sud(dev,epIn,epOut)
     # send BYESUD
     bye_sud(dev,epIn,epOut)
     clean_up(dev)
     # parse to json
-    readings=mungReadings(read_results)
-    postToWeb(readings, url)
+    if read_results:
+      readings=mungReadings(read_results)
+      postToWeb(readings, url)
 
 if __name__ == "__main__":
     main()
